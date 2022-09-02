@@ -17,12 +17,12 @@ module AmazonPay
 
     def self.fetch_api_endpoint_base_url(config_args: {})
       if config_args[:overrideServiceUrl]&.length&.positive?
-        config_args[:overrideServiceUrl]
+        [config_args[:overrideServiceUrl]]
       else
         region = config_args[:region].downcase.to_sym
         region_map = AmazonPay::CONSTANTS[:REGION_MAP][region].to_sym
 
-        [AmazonPay::CONSTANTS[:REGION_MAP][region_map], AmazonPay::CONSTANTS[:API_ENDPOINTS][region_map]]
+        [AmazonPay::CONSTANTS[:API_ENDPOINTS][region_map], AmazonPay::CONSTANTS[:REGION_MAP][region_map]]
       end
     end
 
@@ -31,7 +31,7 @@ module AmazonPay
         method: api_options[:method],
         json: false,
         headers: api_options[:headers],
-        url: "https://#{fetch_api_endpoint_base_url(config_args: config_args)[1]}/#{api_options[:url_fragment]}"\
+        url: "https://#{fetch_api_endpoint_base_url(config_args: config_args)[0]}/#{api_options[:url_fragment]}"\
         "#{fetch_query_string(request_params: api_options[:query_params])}",
         body: api_options[:payload]
       }
@@ -127,8 +127,8 @@ module AmazonPay
 
     def self.sign_headers(config_args: {}, options: {})
       headers = options[:headers] || {}
-      headers['x-amz-pay-region'] = fetch_api_endpoint_base_url(config_args: config_args)[0]
-      headers['x-amz-pay-host'] = fetch_api_endpoint_base_url(config_args: config_args)[1]
+      headers['x-amz-pay-region'] = fetch_api_endpoint_base_url(config_args: config_args)[1]
+      headers['x-amz-pay-host'] = fetch_api_endpoint_base_url(config_args: config_args)[0]
       headers['x-amz-pay-date'] = fetch_timestamp
       headers['content-type'] = 'application/json'
       headers['accept'] = 'application/json'
