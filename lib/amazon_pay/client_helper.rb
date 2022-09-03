@@ -103,7 +103,9 @@ module AmazonPay
         when :GET
           response = http.get(uri, options[:headers])
         when :DELETE
-          response = http.delete(uri.request_uri, options[:headers])
+          request = Net::HTTP::Delete.new(uri.path, options[:headers])
+          request.body = options[:body]
+          response = http.request(request)
         when :POST
           request = Net::HTTP::Post.new(uri.path, options[:headers])
           request.body = options[:body]
